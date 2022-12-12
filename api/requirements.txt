@@ -1,0 +1,4 @@
+fastapi==0.88.0
+pdfminer==20191125
+pdfminer.six==20221105
+python-multipart
