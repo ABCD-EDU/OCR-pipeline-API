@@ -68,6 +68,7 @@ class PDFParser:
             page_data["tokens"] = returned
             pages[page_num] = page_data
 
+            return pages
             if page_num == 2:
                 return pages
 
