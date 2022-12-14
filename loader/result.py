@@ -5,7 +5,7 @@ from pathlib import Path
 from loader.Task1NN import LangModelWithDense
 
 # from loader.config
-
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def download_model():
     # script_dir = os.path.dirname(__file__)
@@ -33,10 +33,31 @@ task2_model = AutoModelForTokenClassification.from_pretrained(bert_model_name, n
 task2_model.load_state_dict(torch.load('./bin/model2.pt'))
 task2_model.eval()
 
-task3_tokenizer = AutoTokenizer.from_pretrained("tobiaslee/roberta-large-defteval-t6-st3")
+inv_eval_ent_dict= {
+   1:'B-Term', 
+   2:'I-Term', 
+   3:'B-Definition', 
+   4:'I-Definition', 
+   5:'B-Alias-Term', 
+   6:'I-Alias-Term',            
+   7:'B-Referential-Definition', 
+   8:'I-Referential-Definition', 
+   9:'B-Referential-Term', 
+   10:'I-Referential-Term',   
+   11:'B-Qualifier', 
+   12:'I-Qualifier', 
+   0:'O'}         
 
-task3_model = AutoModelForSequenceClassification.from_pretrained("tobiaslee/roberta-large-defteval-t6-st3")
-task3_model.eval()
+
+eval_ent_dict = {value:key for key, value in inv_eval_ent_dict.items()}
+
+
+def pred_to_label(pred):
+   output = []
+   for p in pred[0]: 
+      out = inv_eval_ent_dict[torch.argmax(p).item()]
+      output.append(out)
+   return output
 
 
 def get_encoded(text)->dict:
@@ -46,16 +67,32 @@ def get_encoded(text)->dict:
       return_tensors='pt'
    )
    
-   task3_encoding = task3_tokenizer.encode_plus(
-      text.lower(),
-      return_attention_mask=True,
-      return_tensors='pt'
-   )
    task1_2_encoded = dict(
      input_ids=task1_2_encoding['input_ids'].flatten(),
-     attention_mask=encoding['attention_mask'].flatten()
+     attention_mask=task1_2_encoding['attention_mask'].flatten()
    )
    
-   return {"task1_2_encoded"}
+ 
+   
+   return {"task1_2_encoded":task1_2_encoded}
+
+def get_result(text):
+   task1_2_encoded = get_encoded(text)
+   with torch.no_grad():
+      task1_prediction = task1_model(
+         task1_2_encoded['input_ids'].unsqueeze(dim=0).to(device),
+         task1_2_encoded['attention_mask'].unsqueeze(dim=0).to(device))
+
+      if task1_prediction >=0.5:
+         task2_prediction = task2_model(
+         task1_2_encoded['input_ids'].unsqueeze(dim=0).to(device),
+         task1_2_encoded['attention_mask'].unsqueeze(dim=0).to(device))
+         
+         return {"text": text, "labels":pred_to_label(task2_prediction)}
+   
+   return None
+
+      
+     
 
 
