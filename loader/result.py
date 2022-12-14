@@ -76,21 +76,23 @@ def get_encoded(text)->dict:
    
    return {"task1_2_encoded":task1_2_encoded}
 
-def get_result(text):
-   task1_2_encoded = get_encoded(text)
-   with torch.no_grad():
-      task1_prediction = task1_model(
-         task1_2_encoded['input_ids'].unsqueeze(dim=0).to(device),
-         task1_2_encoded['attention_mask'].unsqueeze(dim=0).to(device))
+def get_result(texts):
+   output = []
+   for text in texts:
+      task1_2_encoded = get_encoded(text)
+      with torch.no_grad():
+         task1_prediction = task1_model(
+            task1_2_encoded['input_ids'].unsqueeze(dim=0).to(device),
+            task1_2_encoded['attention_mask'].unsqueeze(dim=0).to(device))
 
-      if task1_prediction >=0.5:
-         task2_prediction = task2_model(
-         task1_2_encoded['input_ids'].unsqueeze(dim=0).to(device),
-         task1_2_encoded['attention_mask'].unsqueeze(dim=0).to(device))
-         
-         return {"text": text, "labels":pred_to_label(task2_prediction)}
+         if task1_prediction >=0.5:
+            task2_prediction = task2_model(
+            task1_2_encoded['input_ids'].unsqueeze(dim=0).to(device),
+            task1_2_encoded['attention_mask'].unsqueeze(dim=0).to(device))
+            
+            output.append({"text": text, "labels":pred_to_label(task2_prediction)})
    
-   return None
+   return output
 
       
      
