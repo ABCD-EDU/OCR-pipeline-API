@@ -12,9 +12,19 @@ app = FastAPI()
 #     file.save(f"./pdfs/{file.filename}")
 #     return {"data": "sheesh"}
 
-@app.post("/pdf/")
+@app.post("/upload/")
 async def create_upload_file(document: UploadFile = File(...)):
-    pdf_file = BytesIO(await document.read())
-    parser = PDFParser.PDFParser(pdf_file)
-    data = parser.parsePDF()
+    # get filename of uploaded file
+    period = document.filename.rfind(".")
+    file = BytesIO(await document.read())
+    data = None
+    print(file)
+    if document.filename[period:] == ".pdf":
+        parser = PDFParser.PDFParser(file)
+        data = parser.parsePDF()
+    else:
+        parser = PDFParser.PDFParser(file.read().decode("utf-8"))
+        # print(type(file.read()))
+        print(parser.src)
+        data = parser.parseText()
     return {"data": data}

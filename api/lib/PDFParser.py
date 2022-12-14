@@ -54,9 +54,34 @@ def constructSentences(tokens):
     sentences = [x.strip() for x in sentences if x.strip() != ""]
     return sentences
 
+def constructSentencesFromText(tokens):
+    sentences = []
+    sentence = ""
+    for token in tokens:
+        text = token
+        # Add it to sentence if it is a period or a bullet point
+        if text[-1] == "." or text == "•":
+            if text == "•":
+                sentences.append(sentence)
+                sentence = "•"
+            if text[-1] == ".":
+                sentence += " " + text
+                sentences.append(sentence)
+                sentence = ""
+        else:
+            sentence += " " + token
+
+    sentences = [x.strip() for x in sentences if x.strip() != ""]
+    return sentences
+
 class PDFParser:
     def __init__(self, src):
         self.src = src
+    
+    def parseText(self):
+        tokens = self.src.split(" ")
+        sentences = constructSentencesFromText(tokens)
+        return sentences
 
     def parsePDF(self):
         pages = {}
