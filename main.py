@@ -5,8 +5,6 @@ from fastapi import FastAPI, File, UploadFile
 import api.lib.PDFParser as PDFParser
 from io import BytesIO
 
-
-
 # app = FastAPI()
 
 # # @app.post("/files/")
@@ -20,8 +18,6 @@ from io import BytesIO
 #     parser = PDFParser.PDFParser(pdf_file)
 #     data = parser.parsePDF()
 #     return {"data": data}
-
-
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import APIRouter, FastAPI
