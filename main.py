@@ -2,7 +2,7 @@
 # See https://fastapi.tiangolo.com/tutorial/first-steps/
 
 from fastapi import FastAPI, File, UploadFile
-import api.lib.PDFParser as PDFParser
+# import api.lib.PDFParser as PDFParser
 from io import BytesIO
 
 # app = FastAPI()

@@ -1,7 +1,7 @@
 import loader.result as result
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-import lib.PDFParser as PDFParser
+import api.lib.PDFParser as PDFParser
 from io import BytesIO
 
 app_router = APIRouter()
@@ -16,7 +16,7 @@ app_router = APIRouter()
 
 @app_router.post('/')
 async def get_results(texts:list):
-   return result.get_result(texts)
+    return result.get_result(texts)
 
 @app_router.post("/upload/")
 async def create_upload_file(document: UploadFile = File(...)):
@@ -31,8 +31,13 @@ async def create_upload_file(document: UploadFile = File(...)):
     else:
         parser = PDFParser.PDFParser(file.read().decode("utf-8"))
         print(parser.src)
-        data = parser.parseText()
+        data = parser.parseText() 
 
+    print("---- inputted ----")
+    print(data)
+    data = result.get_result(data)
+    print("---- returned ----")
+    print(data)
     return {"data": data}
 
 
