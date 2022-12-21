@@ -1,4 +1,4 @@
-import torch
+timport torch
 from transformers import AutoTokenizer, AutoModelForTokenClassification, DistilBertModel, AutoModelForSequenceClassification
 import gdown
 from pathlib import Path
@@ -6,7 +6,7 @@ from loader.Task1NN import LangModelWithDense
 
 # from loader.config
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
+device = torch.device('cpu')
 # def download_model():
 #     # script_dir = os.path.dirname(__file__)
 #     path = "./bin/bert_models/model.pt"
@@ -59,6 +59,7 @@ def pred_to_label(pred):
    output = []
    # print(pred)
    for p in pred: 
+      print(p)
       if p[0]-9<torch.max(p[1:]).item():
          p=p[1:]
          out = inv_eval_ent_dict[torch.argmax(p).item()+1]
@@ -115,10 +116,13 @@ def generate_span(words, labels):
 def get_term_definition(words, labels):
    term =''
    definition = ''
+   # definition_seen = 
+   term_counter =0
    for i in range(len(words)):
       # if 'definition' in labels[i].lower():
       #    definition +=' '+words[i]
-      if 'term' in labels[i].lower():
+      if 'term' in labels[i].lower() and term_counter<=2:
+         term_counter+=1
          term += ' '+words[i]
       elif 'O' != labels[i].lower() and 'term' not in labels[i].lower():
          definition+=' '+words[i]
@@ -143,7 +147,7 @@ def get_result(texts):
          attention_mask.unsqueeze(dim=0).to(device)
             )
          
-         if task1_prediction >=0.4:
+         if task1_prediction >=0.3:
             task2_prediction = task2_model(
              input_ids.unsqueeze(dim=0).to(device),
          attention_mask.unsqueeze(dim=0).to(device)  
